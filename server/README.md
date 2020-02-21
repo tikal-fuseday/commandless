@@ -20,7 +20,7 @@ $ ./target/cmdls-0.0.1-SNAPSHOT-runner
 # Postgres server - Docker
  ```
 docker run --ulimit memlock=-1:-1 -it --rm=true --memory-swappiness=0 --name cmdls_postgres -e POSTGRES_USER=cmdls_user \
--e POSTGRES_PASSWORD=cmdls_passw0rd -e POSTGRES_DB=cmdls_db -p 5432:5432 postgres:10.5
+-v server/db-data/:/var/lib/postgresql/ -e POSTGRES_PASSWORD=cmdls_passw0rd -e POSTGRES_DB=cmdls_db -p 5432:5432 postgres:10.5
 ```
 
 

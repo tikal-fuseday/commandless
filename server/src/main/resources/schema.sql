@@ -29,7 +29,7 @@ CREATE TABLE keyword_recipe (
 
 insert into keyword values(1, 'key0'), (2, 'key1');
 insert into command (id, inputs, bin, npm, brew, github) values(1, '{}', 'mr.bin', 'mpn', null, 'www.gh.com'), (2, '{}', 'mrs.bina', 'npx', 'brew some beer', 'www.github.com');
-insert into recipe (id, command_id, description, inputs) values (1, 1, 'Mock recipe0', '{}'), (2, 2, 'Mock recipe1', '{}')
+insert into recipe (id, command_id, description, inputs) values (1, 1, 'Mock recipe0', '{}'), (2, 2, 'Mock recipe1', '{}');
 insert into keyword_recipe (id, keyword_id, recipe_id) values (1, 1, 1), (2, 2, 1), (3, 2, 2);
 
 

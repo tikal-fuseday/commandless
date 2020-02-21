@@ -28,10 +28,10 @@ class RecipeDao {
                     row.getValue("recipe_inputs").toString(),
                     null)
 
-    fun findRecipes(keys: List<String>, resolution: String?): Flowable<Recipe> {
-        val resolutionSelection = resolution?.let {"""
-            AND command.$resolution IS NOT NULL
-        """.trimIndent() } ?: ""
+    fun findRecipes(keys: List<String>, resolution: Resolution): Flowable<Recipe> {
+        val resolutionSelection =
+                if (resolution == Resolution.ALL) "" else " AND command.${resolution.name.toLowerCase()} IS NOT NULL "
+
         val list = keys.map { "'$it'" }.joinToString(separator = ",")
         return client.rxQuery("""
             SELECT recipe.id AS recipe_id, recipe.inputs AS recipe_inputs, recipe.description, command.inputs AS command_inputs, 

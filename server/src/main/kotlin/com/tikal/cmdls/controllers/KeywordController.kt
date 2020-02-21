@@ -1,6 +1,7 @@
 package com.tikal.cmdls.controllers
 
 import com.tikal.cmdls.model.Keyword
+import com.tikal.cmdls.model.Resolution
 import com.tikal.cmdls.services.KeywordsService
 import com.tikal.cmdls.services.RecipesService
 import org.eclipse.microprofile.openapi.annotations.Operation
@@ -37,7 +38,7 @@ class KeywordController {
     @GET
     @Path("/recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    fun getRecipes(@QueryParam("keywords") keywords: String, @QueryParam("resolution") resolution: String?) =
+    fun getRecipes(@QueryParam("keywords") keywords: String, @QueryParam("resolution") resolution: Resolution = Resolution.ALL) =
             recipeService.getMatchingRecipes(keywords.split(","), resolution)
                     .toList()
                     .blockingGet()

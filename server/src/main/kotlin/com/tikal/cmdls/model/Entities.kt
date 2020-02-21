@@ -6,4 +6,10 @@ data class Recipe(val id: Long?, val description: String, val commandId: Long, v
 
 data class Commands(val id: Long, val inputs: String, val bin: String, val npm: String?, val brew: String?, val github: String?)
 
+enum class Resolution {
+    BREW,
+    NPM,
+    ALL
+}
+
 //data class RecipesDto(val id: Long?, val description: String, val commandId: Long, val input: String, val keywords: List<String>?)

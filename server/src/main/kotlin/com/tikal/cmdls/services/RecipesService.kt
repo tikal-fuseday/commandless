@@ -11,7 +11,7 @@ class RecipesService {
     @Inject
     lateinit var recipeDao: RecipeDao
 
-    fun getMatchingRecipes(keywords: List<String>): Flowable<Recipe> =
-            recipeDao.findRecipes(keywords)
+    fun getMatchingRecipes(keywords: List<String>, resolution: String?): Flowable<Recipe> =
+            recipeDao.findRecipes(keywords, resolution)
 
 }

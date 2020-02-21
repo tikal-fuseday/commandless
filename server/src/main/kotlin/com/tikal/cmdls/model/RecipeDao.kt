@@ -23,21 +23,25 @@ class RecipeDao {
                             row.getValue("command_inputs").toString(),
                             row.getString("bin"),
                             row.getString("npm"),
+                            row.getString("brew"),
                             row.getString("github")),
                     row.getValue("recipe_inputs").toString(),
                     null)
 
-    fun findRecipes(keys: List<String>): Flowable<Recipe> {
+    fun findRecipes(keys: List<String>, resolution: String?): Flowable<Recipe> {
+        val resolutionSelection = resolution?.let {"""
+            AND command.$resolution IS NOT NULL
+        """.trimIndent() } ?: ""
         val list = keys.map { "'$it'" }.joinToString(separator = ",")
         return client.rxQuery("""
-            select recipe.id as recipe_id, recipe.inputs as recipe_inputs, recipe.description, command.inputs as command_inputs, 
-                    command.bin, command.npm, command.github , command.id as command_id
-                from recipe
-                    left join command on recipe.command_id=command.id
-                where recipe.id in(
-                    select distinct recipe_id from keyword_recipe where keyword_id  in(
-                        select id from keyword where keyword.label in ($list)
-                    )
+            SELECT recipe.id AS recipe_id, recipe.inputs AS recipe_inputs, recipe.description, command.inputs AS command_inputs, 
+                    command.bin, command.npm, command.brew, command.github , command.id AS command_id
+                FROM recipe
+                    LEFT JOIN command ON recipe.command_id=command.id
+                WHERE recipe.id IN (
+                    SELECT distinct recipe_id FROM keyword_recipe WHERE keyword_id IN (
+                        SELECT id FROM keyword WHERE keyword.label IN ($list)
+                    ) $resolutionSelection
                 )
         """.trimIndent())
                 .flatMapPublisher { Flowable.fromIterable(it.asIterable()) }

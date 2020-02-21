@@ -6,10 +6,7 @@ import com.tikal.cmdls.services.KeywordsService
 import com.tikal.cmdls.services.RecipesService
 import org.eclipse.microprofile.openapi.annotations.Operation
 import javax.inject.Inject
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam
+import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 @Path("")
@@ -25,8 +22,10 @@ class KeywordController {
     @GET
     @Path("/keywords")
     @Produces(MediaType.APPLICATION_JSON)
-    fun keywordAutocompletion(@QueryParam("q") key: String) =
-            keywordsService.getByPartialKey(key).toList().blockingGet()
+    fun keywordAutocompletion(@QueryParam("q") key: String): List<Keyword> =
+            keywordsService.getByPartialKey(key)
+                    .defaultIfEmpty(emptyList())
+                    .blockingFirst()
 
     @Operation(summary = "dump all", description = "Dump all keywords")
     @GET
@@ -38,8 +37,8 @@ class KeywordController {
     @GET
     @Path("/recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    fun getRecipes(@QueryParam("keywords") keywords: String, @QueryParam("resolution") resolution: Resolution = Resolution.ALL) =
-            recipeService.getMatchingRecipes(keywords.split(","), resolution)
+    fun getRecipes(@QueryParam("keywords") keywords: String, @QueryParam("resolution") @DefaultValue("ALL") resolution: String?) =
+            recipeService.getMatchingRecipes(keywords.split(","), Resolution.fromStr(resolution))
                     .toList()
                     .blockingGet()
 

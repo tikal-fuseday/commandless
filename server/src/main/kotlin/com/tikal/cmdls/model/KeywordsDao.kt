@@ -31,10 +31,12 @@ class KeywordDao {
                     .flatMapPublisher { Flowable.fromIterable(it.asIterable()) }
                     .map (::rowSetToKeyword)
 
-    fun find(key: String): Flowable<Keyword> =
+    fun find(key: String): Flowable<List<Keyword>> =
             client.rxQuery("SELECT id, label FROM $TABLE_NAME WHERE lower(label) LIKE '${key.toLowerCase()}%'")
                     .flatMapPublisher { Flowable.fromIterable(it.asIterable()) }
                     .map (::rowSetToKeyword)
+                    .toList()
+                    .toFlowable()
 
     fun find(id: Long): Maybe<Keyword> =
             client.rxQuery("SELECT id, label FROM $TABLE_NAME WHERE id=$id")

@@ -9,7 +9,12 @@ data class Commands(val id: Long, val inputs: String, val bin: String, val npm: 
 enum class Resolution {
     BREW,
     NPM,
-    ALL
+    ALL;
+
+    companion object {
+        fun fromStr(str: String?) = str?.let { values().firstOrNull { it.name.equals(str, true) } ?: ALL }
+                ?: ALL
+    }
 }
 
 //data class RecipesDto(val id: Long?, val description: String, val commandId: Long, val input: String, val keywords: List<String>?)

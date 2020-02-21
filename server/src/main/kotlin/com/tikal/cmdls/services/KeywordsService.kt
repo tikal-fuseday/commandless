@@ -19,9 +19,9 @@ class KeywordsService {
         val log: Logger = LoggerFactory.getLogger(KeywordsService::class.java)
     }
 
-    fun getByPartialKey(key: String): Flowable<Keyword> =
+    fun getByPartialKey(key: String): Flowable<List<Keyword>> =
             keywordsDao.find(key)
-                    .switchIfEmpty(Flowable.error(NotFoundException()))
+                    .switchIfEmpty(Flowable.empty())
 
     fun sayHi(): String {
         log.info("Saying hi")

@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
 // 
 import com.tikal.cmdls.command.Command
+import com.tikal.cmdls.command.Resolution
 import com.tikal.cmdls.command.ResolutionType
 
 @ApplicationScoped
@@ -26,10 +27,12 @@ class RecipeDao {
             Command(
                 row.getLong("command_id"),
                 row.getValue("command_inputs").toString(),
-                row.getString("bin"),
-                row.getString("npm"),
-                row.getString("brew"),
-                row.getString("github")
+                Resolution(
+                    row.getString("bin"),
+                    row.getString("npm"),
+                    row.getString("brew"),
+                    row.getString("github")
+                )
             ),
             row.getValue("recipe_inputs").toString(),
             null

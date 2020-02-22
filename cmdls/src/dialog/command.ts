@@ -1,6 +1,7 @@
+import * as chalk from "chalk"
 import * as prompts from "prompts"
 import {RecipeResponse} from "../api/recipe"
-import {Input} from "../data"
+import {Input, OptionValues} from "../data"
 
 interface InputTypeToPromptType {
   [prop: string]: prompts.PromptType
@@ -12,11 +13,11 @@ const inputTypeToPromptType: InputTypeToPromptType = {
   boolean: "toggle",
 }
 
-function convertInputToPrompt(input: Input, i: number): prompts.PromptObject {
+function convertInputToPrompt(input: Input): prompts.PromptObject {
   const type = inputTypeToPromptType[input.type]
   return {
     type,
-    name: input.short || input.long || "arg" + i,
+    name: input.name,
     message: input.description,
     initial: input.value,
     active: type === "toggle" ? "yes" : undefined,
@@ -24,8 +25,28 @@ function convertInputToPrompt(input: Input, i: number): prompts.PromptObject {
   }
 }
 
-export async function CommandDialog(recipe: RecipeResponse): Promise<void> {
-  const choices = recipe.command.inputs.map(convertInputToPrompt)
+export async function CommandDialog(
+  recipe: RecipeResponse,
+): Promise<OptionValues> {
+  const {command} = recipe
+  // console.log(
+  //   `${chalk.green("✔")} ${chalk.yellow(command.resolution.bin)} has ${
+  //     command.inputs.length
+  //   } options`,
+  // )
+
+  // 1. Prompt only for required options
+  // 2. [generated command]
+  //    > Run
+  //    > Edit
+  //    > Review additional properties
+
+  const choices = command.inputs.map((input) => {
+    return convertInputToPrompt({
+      ...input,
+      ...recipe.inputs[input.name],
+    })
+  })
   const response = await prompts(choices)
-  console.log(response)
+  return response
 }

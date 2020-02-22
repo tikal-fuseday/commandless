@@ -11,6 +11,9 @@ export async function listRecipes(
   const response = await axios.get(
     `http://localhost:8080/recipes?keywords=${keywords.join(",")}`,
   )
-  console.log(response.data)
+  for (const recipe of response.data) {
+    recipe.inputs = JSON.parse(recipe.inputs)
+    recipe.command.inputs = JSON.parse(recipe.command.inputs)
+  }
   return response.data
 }

@@ -1,7 +1,7 @@
-import {Input} from "./"
+import {InputOverridesByName} from "./"
 
 export interface Recipe {
   description: string
   keywords: string[]
-  inputs: Partial<Input>[]
+  inputs: InputOverridesByName
 }

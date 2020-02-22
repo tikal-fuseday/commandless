@@ -1,0 +1,29 @@
+{
+  "name": "cmdls",
+  "version": "0.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "prompts": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^13.7.2",
+    "@types/prompts": "^2.0.3",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.5"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "semi": false,
+    "arrowParens": "always",
+    "trailingComma": "all",
+    "bracketSpacing": false
+  }
+}

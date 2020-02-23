@@ -2,7 +2,7 @@ import * as chalk from "chalk"
 import * as prompts from "prompts"
 import {Command, Input, getShellCommand, OptionValues} from "../data"
 
-export enum ConfirmationDecision {
+export enum CommandDecision {
   Run,
   EditSelectedOptions,
   ReviewRequiredOptions,
@@ -10,11 +10,11 @@ export enum ConfirmationDecision {
 }
 
 export interface CommandAction {
-  decision: ConfirmationDecision
+  decision: CommandDecision
   inputs: Input[]
 }
 
-export async function ConfirmationDialog(
+export async function CommandActionDialog(
   command: Command,
   optionValues: OptionValues,
 ): Promise<CommandAction> {
@@ -40,7 +40,7 @@ export async function ConfirmationDialog(
     choices.push({
       title: "Review required options",
       value: {
-        decision: ConfirmationDecision.ReviewRequiredOptions,
+        decision: CommandDecision.ReviewRequiredOptions,
         inputs: requiredOptions,
       },
     })
@@ -48,7 +48,7 @@ export async function ConfirmationDialog(
     choices.push({
       title: "Run",
       value: {
-        decision: ConfirmationDecision.Run,
+        decision: CommandDecision.Run,
         inputs: [],
       },
     })
@@ -57,7 +57,7 @@ export async function ConfirmationDialog(
     choices.push({
       title: "Review more options",
       value: {
-        decision: ConfirmationDecision.ReviewMoreOptions,
+        decision: CommandDecision.ReviewMoreOptions,
         inputs: additionalOptions,
       },
     })
@@ -66,7 +66,7 @@ export async function ConfirmationDialog(
     choices.push({
       title: "Edit selected options",
       value: {
-        decision: ConfirmationDecision.EditSelectedOptions,
+        decision: CommandDecision.EditSelectedOptions,
         inputs: completedOptions,
       },
     })

@@ -1,8 +1,8 @@
-export {RecipeDialog} from "./recipe"
-export {CommandDialog} from "./command"
-export {OptionDialog} from "./option"
+export {RecipeDialog} from "./Recipe"
+export {CommandDialog} from "./Command"
+export {OptionDialog} from "./Option"
 export {
-  ConfirmationDialog,
-  ConfirmationDecision,
+  CommandActionDialog,
+  CommandDecision as ConfirmationDecision,
   CommandAction,
-} from "./confirmation"
+} from "./CommandAction"

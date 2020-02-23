@@ -2,10 +2,10 @@ import {RecipeResponse} from "../api/recipe"
 import {Input, OptionValues, getShellCommand, runShellCommand} from "../data"
 import {
   OptionDialog,
-  ConfirmationDialog,
+  CommandActionDialog,
   ConfirmationDecision,
   CommandAction,
-} from "../dialog"
+} from "."
 
 function getInitialOptionValues(recipe: RecipeResponse): OptionValues {
   const initialOptionValues: OptionValues = {}
@@ -50,7 +50,7 @@ export async function CommandDialog(recipe: RecipeResponse): Promise<void> {
     !commandAction ||
     commandAction.decision !== ConfirmationDecision.Run
   ) {
-    commandAction = await ConfirmationDialog(recipe.command, optionValues)
+    commandAction = await CommandActionDialog(recipe.command, optionValues)
     optionValues = await getOptionValues(optionValues, commandAction)
   }
   const shellCommand = getShellCommand(recipe.command, optionValues)

@@ -11,7 +11,7 @@ export interface Input {
 }
 
 export interface InputOverride {
-  value: string
+  value: string | number | boolean | null
 }
 
 export interface InputOverridesByName {

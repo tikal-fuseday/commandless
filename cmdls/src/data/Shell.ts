@@ -23,7 +23,7 @@ export function getShellCommand(
       ? `-${input.short}`
       : ""
     const value = options[input.name]
-    return value === null || value === false
+    return value === null || value === undefined || value === false
       ? args
       : value === true
       ? [...args, flag]
@@ -35,7 +35,7 @@ export function getShellCommand(
   }
 }
 
-export async function run(cmd: ShellCommand): Promise<void> {
+export async function runShellCommand(cmd: ShellCommand): Promise<void> {
   return new Promise((resolve, reject) => {
     console.log(`${chalk.green("✔")} Launching ${chalk.green(cmd.bin)}`)
     const childProcess = spawn(cmd.bin, cmd.args)

@@ -1,52 +1,58 @@
-import * as chalk from "chalk"
-import * as prompts from "prompts"
 import {RecipeResponse} from "../api/recipe"
-import {Input, OptionValues} from "../data"
+import {Input, OptionValues, getShellCommand, runShellCommand} from "../data"
+import {
+  OptionDialog,
+  ConfirmationDialog,
+  ConfirmationDecision,
+  CommandAction,
+} from "../dialog"
 
-interface InputTypeToPromptType {
-  [prop: string]: prompts.PromptType
-}
-
-const inputTypeToPromptType: InputTypeToPromptType = {
-  string: "text",
-  number: "number",
-  boolean: "toggle",
-}
-
-function convertInputToPrompt(input: Input): prompts.PromptObject {
-  const type = inputTypeToPromptType[input.type]
-  return {
-    type,
-    name: input.name,
-    message: input.description,
-    initial: input.value,
-    active: type === "toggle" ? "yes" : undefined,
-    inactive: type === "toggle" ? "no" : undefined,
+function getInitialOptionValues(recipe: RecipeResponse): OptionValues {
+  const initialOptionValues: OptionValues = {}
+  for (const inputName in recipe.inputs) {
+    initialOptionValues[inputName] = recipe.inputs[inputName].value
   }
+  return initialOptionValues
 }
 
-export async function CommandDialog(
-  recipe: RecipeResponse,
+async function collectOptionValues(inputs: Input[]): Promise<OptionValues> {
+  const optionValues: OptionValues = {}
+  for (const input of inputs) {
+    const {[input.name]: optionValue} = await OptionDialog(input)
+    optionValues[input.name] = optionValue
+  }
+  return optionValues
+}
+
+async function getOptionValues(
+  prevOptionValues: OptionValues,
+  prevCommandAction: CommandAction,
 ): Promise<OptionValues> {
-  const {command} = recipe
-  // console.log(
-  //   `${chalk.green("✔")} ${chalk.yellow(command.resolution.bin)} has ${
-  //     command.inputs.length
-  //   } options`,
-  // )
-
-  // 1. Prompt only for required options
-  // 2. [generated command]
-  //    > Run
-  //    > Edit
-  //    > Review additional properties
-
-  const choices = command.inputs.map((input) => {
-    return convertInputToPrompt({
-      ...input,
-      ...recipe.inputs[input.name],
+  if (prevCommandAction.decision === ConfirmationDecision.Run) {
+    return prevOptionValues
+  }
+  const overridenInputs = prevCommandAction.inputs //
+    .map((input, i, inputs) => {
+      return {
+        ...input,
+        description: `(${i + 1}/${inputs.length}) ${input.description}`,
+        value: prevOptionValues[input.name],
+      }
     })
-  })
-  const response = await prompts(choices)
-  return response
+  const optionValues = await collectOptionValues(overridenInputs)
+  return {...prevOptionValues, ...optionValues}
+}
+
+export async function CommandDialog(recipe: RecipeResponse): Promise<void> {
+  let optionValues = getInitialOptionValues(recipe)
+  let commandAction: CommandAction | null = null
+  while (
+    !commandAction ||
+    commandAction.decision !== ConfirmationDecision.Run
+  ) {
+    commandAction = await ConfirmationDialog(recipe.command, optionValues)
+    optionValues = await getOptionValues(optionValues, commandAction)
+  }
+  const shellCommand = getShellCommand(recipe.command, optionValues)
+  await runShellCommand(shellCommand)
 }

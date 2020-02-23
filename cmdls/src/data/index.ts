@@ -1,17 +1,10 @@
-import {Command} from "./Command"
-import {InputType, Input, InputOverride, InputOverridesByName} from "./Input"
-import {Recipe} from "./Recipe"
-import {Resolution} from "./Resolution"
-import {OptionValues, ShellCommand} from "./Shell"
-
+export {Command} from "./Command"
+export {InputType, Input, InputOverride, InputOverridesByName} from "./Input"
+export {Recipe} from "./Recipe"
+export {Resolution} from "./Resolution"
 export {
-  Command,
-  Input,
-  InputType,
-  InputOverride,
-  InputOverridesByName,
-  Recipe,
-  Resolution,
   OptionValues,
   ShellCommand,
-}
+  getShellCommand,
+  runShellCommand,
+} from "./Shell"

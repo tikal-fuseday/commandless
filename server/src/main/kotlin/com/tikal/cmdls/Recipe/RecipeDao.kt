@@ -26,12 +26,11 @@ class RecipeDao {
             row.getLong("command_id"),
             Command(
                 row.getLong("command_id"),
+                row.getString("bin"),
                 row.getValue("command_inputs").toString(),
                 Resolution(
-                    row.getString("bin"),
                     row.getString("npm"),
-                    row.getString("brew"),
-                    row.getString("github")
+                    row.getString("brew")
                 )
             ),
             row.getValue("recipe_inputs").toString(),

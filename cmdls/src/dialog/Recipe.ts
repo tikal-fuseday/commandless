@@ -1,11 +1,12 @@
 import * as prompts from "prompts"
-import {listRecipes, RecipeResponse} from "../api/recipe"
+import {listRecipes} from "../api/recipe"
+import {Recipe} from "../data"
 
 function getKeywords(): string[] {
   return process.argv.slice(2)
 }
 
-export async function RecipeDialog(): Promise<RecipeResponse | undefined> {
+export async function RecipeDialog(): Promise<Recipe | undefined> {
   const keywords = getKeywords()
   if (keywords.length === 0) {
     console.log("Provide a list of keywords")
@@ -18,8 +19,8 @@ export async function RecipeDialog(): Promise<RecipeResponse | undefined> {
   }
   const choices = recipes.map((recipe) => {
     return {
-      title: recipe.command.resolution.bin,
-      description: recipe.description,
+      title: recipe.description,
+      // description: recipe.command.bin,
       value: recipe,
     }
   })
@@ -30,5 +31,5 @@ export async function RecipeDialog(): Promise<RecipeResponse | undefined> {
     choices,
     initial: 0,
   })
-  return recipeSelect as RecipeResponse
+  return recipeSelect as Recipe
 }

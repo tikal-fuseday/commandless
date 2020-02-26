@@ -1,9 +1,8 @@
-import * as chalk from "chalk"
 import * as prompts from "prompts"
-import {Command, Input, getShellCommand, OptionValues} from "../data"
+import {Input, CommandApplication} from "../data"
 
 export enum CommandDecision {
-  Run,
+  ProceedToExecution,
   EditSelectedOptions,
   ReviewRequiredOptions,
   ReviewMoreOptions,
@@ -14,73 +13,85 @@ export interface CommandAction {
   inputs: Input[]
 }
 
-export async function CommandActionDialog(
-  command: Command,
-  optionValues: OptionValues,
-): Promise<CommandAction> {
-  const {bin, args} = getShellCommand(command, optionValues)
-
-  const completedOptions = command.inputs.filter((input) => {
-    return typeof optionValues[input.name] !== "undefined"
-  })
-  const additionalOptions = command.inputs.filter((input) => {
-    return typeof optionValues[input.name] === "undefined"
-  })
-  const requiredOptions = command.inputs.filter((input) => {
-    return input.isRequired && typeof optionValues[input.name] === "undefined"
-  })
-  const hasRequiredOptions = requiredOptions.length > 0
-  const hasMoreOptions = additionalOptions.length > 0
-  const hasCompletedOptions = completedOptions.length > 0
-  const showReviewMoreOptions = !hasRequiredOptions && hasMoreOptions
-  const showEditCompletedOptions = !hasRequiredOptions && hasCompletedOptions
-
-  const choices: prompts.Choice[] = []
-  if (hasRequiredOptions) {
-    choices.push({
-      title: "Review required options",
-      value: {
-        decision: CommandDecision.ReviewRequiredOptions,
-        inputs: requiredOptions,
-      },
-    })
-  } else {
-    choices.push({
-      title: "Run",
-      value: {
-        decision: CommandDecision.Run,
-        inputs: [],
-      },
-    })
+export class CommandActionDialog {
+  private commandApplication: CommandApplication
+  private promptChoices: prompts.Choice[]
+  constructor(commandApplication: CommandApplication) {
+    this.commandApplication = commandApplication
+    this.promptChoices = [
+      CommandActionDialog.ReviewRequiredOptions(this),
+      CommandActionDialog.RunPromptChoice(this),
+      CommandActionDialog.ReviewAdditionalOptions(this),
+      CommandActionDialog.EditSubmittedOptions(this),
+    ]
+      .filter(({isEnabled}) => isEnabled)
+      .map(({promptChoice}) => promptChoice)
   }
-  if (showReviewMoreOptions) {
-    choices.push({
-      title: "Review more options",
-      value: {
-        decision: CommandDecision.ReviewMoreOptions,
-        inputs: additionalOptions,
-      },
+  private get isConfigured(): boolean {
+    return !this.commandApplication.hasRequiredInputs
+  }
+  public async run(): Promise<CommandAction> {
+    const choices = this.promptChoices
+    if (choices.length === 1) {
+      return choices[0].value
+    }
+    const message = `Generated command ${this.commandApplication.show()}`
+    const response = await prompts({
+      type: "select",
+      name: "confirmationDecision",
+      message,
+      choices,
     })
+    return response.confirmationDecision
   }
-  if (showEditCompletedOptions) {
-    choices.push({
-      title: "Edit selected options",
-      value: {
-        decision: CommandDecision.EditSelectedOptions,
-        inputs: completedOptions,
+  static RunPromptChoice(dialog: CommandActionDialog) {
+    return {
+      isEnabled: dialog.isConfigured,
+      promptChoice: {
+        title: "Proceed",
+        value: {
+          decision: CommandDecision.ProceedToExecution,
+          inputs: [],
+        },
       },
-    })
+    }
   }
-  if (choices.length === 1) {
-    return choices[0].value
+  static ReviewRequiredOptions(dialog: CommandActionDialog) {
+    return {
+      isEnabled: !dialog.isConfigured,
+      promptChoice: {
+        title: "Review required options",
+        value: {
+          decision: CommandDecision.ReviewRequiredOptions,
+          inputs: dialog.commandApplication.requiredInputs,
+        },
+      },
+    }
   }
-  const stringCmd = chalk.yellow(`${bin} ${args.join(" ")}`)
-  const response = await prompts({
-    type: "select",
-    name: "confirmationDecision",
-    message: stringCmd,
-    choices,
-    initial: 1,
-  })
-  return response.confirmationDecision
+  static ReviewAdditionalOptions(dialog: CommandActionDialog) {
+    return {
+      isEnabled:
+        dialog.isConfigured && dialog.commandApplication.hasAdditionalInputs,
+      promptChoice: {
+        title: "Review more options",
+        value: {
+          decision: CommandDecision.ReviewMoreOptions,
+          inputs: dialog.commandApplication.additionalInputs,
+        },
+      },
+    }
+  }
+  static EditSubmittedOptions(dialog: CommandActionDialog) {
+    return {
+      isEnabled:
+        dialog.isConfigured && dialog.commandApplication.hasSubmittedInputs,
+      promptChoice: {
+        title: "Edit submitted options",
+        value: {
+          decision: CommandDecision.EditSelectedOptions,
+          inputs: dialog.commandApplication.submittedInputs,
+        },
+      },
+    }
+  }
 }

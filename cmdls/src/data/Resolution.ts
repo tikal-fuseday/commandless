@@ -1,5 +1,4 @@
 export interface Resolution {
-  bin: string
-  npm: string
-  github: string
+  npm?: string
+  brew?: string
 }

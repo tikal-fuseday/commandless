@@ -1,5 +1,4 @@
-import {RecipeResponse} from "../api/recipe"
-import {Input, OptionValues, getShellCommand, runShellCommand} from "../data"
+import {Recipe, CommandApplication, Input, OptionValues} from "../data"
 import {
   OptionDialog,
   CommandActionDialog,
@@ -7,10 +6,10 @@ import {
   CommandAction,
 } from "."
 
-function getInitialOptionValues(recipe: RecipeResponse): OptionValues {
+function getInitialOptionValues(recipe: Recipe): OptionValues {
   const initialOptionValues: OptionValues = {}
-  for (const inputName in recipe.inputs) {
-    initialOptionValues[inputName] = recipe.inputs[inputName].value
+  for (const inputName in recipe.inputOverrides) {
+    initialOptionValues[inputName] = recipe.inputOverrides[inputName].value
   }
   return initialOptionValues
 }
@@ -28,7 +27,7 @@ async function getOptionValues(
   prevOptionValues: OptionValues,
   prevCommandAction: CommandAction,
 ): Promise<OptionValues> {
-  if (prevCommandAction.decision === ConfirmationDecision.Run) {
+  if (prevCommandAction.decision === ConfirmationDecision.ProceedToExecution) {
     return prevOptionValues
   }
   const overridenInputs = prevCommandAction.inputs //
@@ -43,16 +42,20 @@ async function getOptionValues(
   return {...prevOptionValues, ...optionValues}
 }
 
-export async function CommandDialog(recipe: RecipeResponse): Promise<void> {
+export async function CommandDialog(
+  recipe: Recipe,
+): Promise<CommandApplication> {
   let optionValues = getInitialOptionValues(recipe)
   let commandAction: CommandAction | null = null
+  let commandApplication = new CommandApplication(recipe.command, optionValues)
   while (
     !commandAction ||
-    commandAction.decision !== ConfirmationDecision.Run
+    commandAction.decision !== ConfirmationDecision.ProceedToExecution
   ) {
-    commandAction = await CommandActionDialog(recipe.command, optionValues)
+    const commandActionDialog = new CommandActionDialog(commandApplication)
+    commandAction = await commandActionDialog.run()
     optionValues = await getOptionValues(optionValues, commandAction)
+    commandApplication = new CommandApplication(recipe.command, optionValues)
   }
-  const shellCommand = getShellCommand(recipe.command, optionValues)
-  await runShellCommand(shellCommand)
+  return commandApplication
 }

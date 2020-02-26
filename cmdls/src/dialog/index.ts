@@ -6,3 +6,5 @@ export {
   CommandDecision as ConfirmationDecision,
   CommandAction,
 } from "./CommandAction"
+export {ExecutionDialog} from "./ExecutionDialog"
+export {PackageManagementDialog} from "./PackageManagement"

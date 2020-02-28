@@ -5,7 +5,6 @@ import javax.inject.Inject
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 //
-import com.tikal.cmdls.command.ResolutionType
 import com.tikal.cmdls.recipe.RecipeService
 
 @Path("/recipes")
@@ -19,14 +18,14 @@ class RecipeController {
     @Produces(MediaType.APPLICATION_JSON)
     fun getRecipes(
         @QueryParam("keywords") keywords: String,
-        @QueryParam("resolution") @DefaultValue("") resolution: String
+        @QueryParam("resolution") @DefaultValue("") resolution: String,
+        @QueryParam("pm") @DefaultValue("false") isPackageManager: Boolean
     ) =
         recipeService
             .getMatchingRecipes(
-                keywords.split(","),
-                resolution.split(",")
-                    .map { ResolutionType.fromStr(it) }
-                    .filterNotNull()
+                keywords.split(",").filter{ it != "" },
+                resolution.split(",").filter{ it != "" },
+                isPackageManager
             )
             .toList()
             .blockingGet()

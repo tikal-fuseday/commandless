@@ -8,7 +8,6 @@ import javax.inject.Inject
 // 
 import com.tikal.cmdls.command.Command
 import com.tikal.cmdls.command.Resolution
-import com.tikal.cmdls.command.ResolutionType
 
 @ApplicationScoped
 class RecipeDao {
@@ -21,40 +20,40 @@ class RecipeDao {
 
     private fun rowSetToRecipe(row: Row): Recipe =
         Recipe(
-            row.getLong("recipe_id"),
             row.getString("description"),
-            row.getLong("command_id"),
             Command(
-                row.getLong("command_id"),
                 row.getString("bin"),
-                row.getValue("command_inputs").toString(),
-                Resolution(
-                    row.getString("npm"),
-                    row.getString("brew")
-                )
+                row.getString("resolution_key"),
+                row.getValue("resolution").toString(),
+                row.getValue("inputs").toString()
             ),
-            row.getValue("recipe_inputs").toString(),
-            null
+            row.getValue("input_overrides").toString()
         )
 
-    fun findRecipes(keywords: List<String>, resolutions: List<ResolutionType>): Flowable<Recipe> {
+    fun findRecipes(keywords: List<String>, resolutions: List<String>, isPackageManager: Boolean): Flowable<Recipe> {
         val whereKeywords = keywords.map { "'$it'" }.joinToString(separator = ",")
-        val whereResolutions = if (resolutions.size == 0) ""
-            else "AND (" + resolutions
-                .map { "command.${it.name.toLowerCase()} IS NOT NULL" }
-                .joinToString(separator = " OR ") + ")"
-        val query = """
-            SELECT recipe.id AS recipe_id, recipe.inputs AS recipe_inputs, recipe.description, command.inputs AS command_inputs, 
-                command.bin, command.npm, command.brew, command.github , command.id AS command_id
-            FROM recipe
-                LEFT JOIN command ON recipe.command_id=command.id
-            WHERE recipe.id IN (
-                SELECT distinct recipe_id FROM keyword_recipe WHERE keyword_id IN (
-                    SELECT id FROM keyword WHERE keyword.label IN ($whereKeywords)
-                ) $whereResolutions
+        val whereResolutions = resolutions.map { "'$it'" }.joinToString(separator = ",")
+        var query = """
+            SELECT DISTINCT ON (r.id)
+                r.description,
+                r.inputs AS input_overrides,
+                c.bin,
+                c.github,
+                c.inputs,
+                c.resolution_key,
+                c.resolution
+            FROM keyword_recipe as kr
+            JOIN recipe AS r ON (kr.recipe_id = r.id)
+            JOIN command AS c ON (c.id = r.command_id)
+            WHERE keyword_id IN (
+                SELECT id
+                FROM keyword
+                WHERE keyword.label IN ($whereKeywords)
             )
-        """.trimIndent()
-        return client.rxQuery(query)
+        """
+        if (resolutions.size > 0) query += ("AND c.resolution ?| array[" + whereResolutions + "]")
+        if (isPackageManager) query += " AND c.resolution_key IS NOT NULL"
+        return client.rxQuery(query.trimIndent())
             .flatMapPublisher { Flowable.fromIterable(it.asIterable()) }
             .map (::rowSetToRecipe)
     }

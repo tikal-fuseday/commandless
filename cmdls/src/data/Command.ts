@@ -1,5 +1,9 @@
 import * as childProcess from "child_process"
-import {Resolution, Input} from "./"
+import {Input} from "./"
+
+export interface Resolution {
+  [resolutionKey: string]: string
+}
 
 export interface ICommand {
   bin: string

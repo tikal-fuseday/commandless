@@ -1,9 +1,9 @@
 import * as childProcess from "child_process"
 import * as chalk from "chalk"
-import {Command, Input} from "."
+import {Command, Input, InputValue} from "."
 
 export interface OptionValues {
-  [optionName: string]: string | number | boolean | null
+  [optionName: string]: InputValue
 }
 
 interface ShellCommand {
@@ -38,7 +38,7 @@ export class CommandApplication {
     this.hasAdditionalInputs = this.additionalInputs.length > 0
     this.hasSubmittedInputs = this.submittedInputs.length > 0
   }
-  private getShellCommand(): ShellCommand {
+  public getShellCommand(): ShellCommand {
     const args = this.command.inputs
       .reduce((args, input) => {
         const flag = input.long
@@ -51,8 +51,10 @@ export class CommandApplication {
           ? args
           : value === true
           ? [...args, flag]
+          : Array.isArray(value)
+          ? [...args, flag, ...value.map(String)]
           : [...args, flag, String(value)]
-      }, [])
+      }, [] as string[])
       .filter((arg) => arg !== "")
     return {
       bin: this.command.bin,
@@ -62,6 +64,14 @@ export class CommandApplication {
   public show(): string {
     const {bin, args} = this.getShellCommand()
     return chalk.yellow(`${bin} ${args.join(" ")}`)
+  }
+  public supplyNext(inputValue: InputValue): this {
+    const nextInput = this.requiredInputs.shift()
+    if (nextInput) {
+      this.optionValues[nextInput.name] = inputValue
+      this.submittedInputs.push(nextInput)
+    }
+    return this
   }
   public async execute(): Promise<void> {
     const {bin, args} = this.getShellCommand()

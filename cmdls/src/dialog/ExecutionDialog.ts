@@ -8,7 +8,7 @@ export class ExecutionDialog {
   constructor(commandApplication: CommandApplication) {
     this.commandApplication = commandApplication
     this.packageManagementDialog = new PackageManagementDialog(
-      commandApplication.command,
+      commandApplication,
     )
   }
   async run(): Promise<void> {

@@ -6,14 +6,6 @@ import {
   CommandAction,
 } from "."
 
-function getInitialOptionValues(recipe: Recipe): OptionValues {
-  const initialOptionValues: OptionValues = {}
-  for (const inputName in recipe.inputOverrides) {
-    initialOptionValues[inputName] = recipe.inputOverrides[inputName].value
-  }
-  return initialOptionValues
-}
-
 async function collectOptionValues(inputs: Input[]): Promise<OptionValues> {
   const optionValues: OptionValues = {}
   for (const input of inputs) {
@@ -45,7 +37,7 @@ async function getOptionValues(
 export async function CommandDialog(
   recipe: Recipe,
 ): Promise<CommandApplication> {
-  let optionValues = getInitialOptionValues(recipe)
+  let optionValues = recipe.getOptionValues()
   let commandAction: CommandAction | null = null
   let commandApplication = new CommandApplication(recipe.command, optionValues)
   while (

@@ -1,5 +1,10 @@
-export {Command} from "./Command"
+export {Command, Resolution} from "./Command"
 export {CommandApplication, OptionValues} from "./CommandApplication"
-export {InputType, Input, InputOverride, InputOverridesByName} from "./Input"
-export {Recipe} from "./Recipe"
-export {Resolution} from "./Resolution"
+export {
+  InputType,
+  Input,
+  InputValue,
+  InputOverride,
+  InputOverridesByName,
+} from "./Input"
+export {Recipe, RecipeType} from "./Recipe"

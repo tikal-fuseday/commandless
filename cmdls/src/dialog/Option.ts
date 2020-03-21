@@ -9,6 +9,7 @@ const inputTypeToPromptType: InputTypeToPromptType = {
   string: "text",
   number: "number",
   boolean: "toggle",
+  array: "list",
 }
 
 function convertInputToPrompt(input: Input): prompts.PromptObject {
@@ -20,6 +21,8 @@ function convertInputToPrompt(input: Input): prompts.PromptObject {
     initial: input.value,
     active: type === "toggle" ? "yes" : undefined,
     inactive: type === "toggle" ? "no" : undefined,
+    // @ts-ignore
+    separator: type === "list" ? " " : undefined,
   }
 }
 

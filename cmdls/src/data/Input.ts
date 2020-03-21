@@ -1,4 +1,4 @@
-export type InputType = "string" | "number" | "boolean"
+export type InputType = "string" | "number" | "boolean" | "array"
 
 export interface Input {
   name: string
@@ -10,8 +10,10 @@ export interface Input {
   value?: any
 }
 
+export type InputValue = string[] | string | number | boolean | null
+
 export interface InputOverride {
-  value: string | number | boolean | null
+  value: InputValue
 }
 
 export interface InputOverridesByName {

@@ -1,5 +1,5 @@
 import * as prompts from "prompts"
-import {listRecipes} from "../api/recipe"
+import {listRecipesByKeywords} from "../api/recipe"
 import {Recipe} from "../data"
 
 function getKeywords(): string[] {
@@ -12,7 +12,7 @@ export async function RecipeDialog(): Promise<Recipe | undefined> {
     console.log("Provide a list of keywords")
     return
   }
-  const recipes = await listRecipes(keywords)
+  const recipes = await listRecipesByKeywords(keywords)
   if (recipes.length === 0) {
     console.log("no recipes found")
     return

@@ -17,16 +17,22 @@ class RecipeController {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     fun getRecipes(
-        @QueryParam("keywords") keywords: String,
-        @QueryParam("resolution") @DefaultValue("") resolution: String,
-        @QueryParam("pm") @DefaultValue("false") isPackageManager: Boolean
+        @QueryParam("keywords") @DefaultValue("") keywords: String,
+        @QueryParam("package_managers") @DefaultValue("") availableResolutions: String,
+        @QueryParam("type") @DefaultValue("") recipeTypes: String
     ) =
-        recipeService
-            .getMatchingRecipes(
-                keywords.split(",").filter{ it != "" },
-                resolution.split(",").filter{ it != "" },
-                isPackageManager
-            )
-            .toList()
-            .blockingGet()
+        if (keywords != "")
+            recipeService
+                .getRecipesByKeywords(
+                    keywords.split(",").filter{ it != "" },
+                    availableResolutions.split(",").filter{ it != "" }
+                )
+                .toList()
+                .blockingGet()
+        else recipeService
+                .getRecipesByTypes(
+                    recipeTypes.split(",").filter{ it != "" }
+                )
+                .toList()
+                .blockingGet()
 }

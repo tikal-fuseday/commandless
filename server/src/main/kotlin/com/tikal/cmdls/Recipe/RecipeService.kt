@@ -12,10 +12,19 @@ class RecipeService {
     @Inject
     lateinit var recipeDao: RecipeDao
 
-    fun getMatchingRecipes(
+    fun getRecipesByKeywords(
         keywords: List<String>,
-        resolutions: List<String>,
-        isPackageManager: Boolean
-    ): Flowable<Recipe> =
-        recipeDao.findRecipes(keywords, resolutions, isPackageManager)
+        resolutions: List<String>
+    ): Flowable<Recipe> {
+        return recipeDao.findRecipes(
+            keywords,
+            resolutions
+        )
+    }
+
+    fun getRecipesByTypes(
+        recipeTypes: List<String>
+    ): Flowable<Recipe> {
+        return recipeDao.findRecipes(recipeTypes = recipeTypes)
+    }
 }

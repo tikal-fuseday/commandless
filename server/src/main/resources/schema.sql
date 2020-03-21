@@ -11,11 +11,15 @@ CREATE TABLE command (
     inputs jsonb not null
 );
 
+CREATE TYPE recipe_type AS ENUM ('regular', 'runner', 'installer');
+
 CREATE TABLE recipe (
     id serial primary key,
     command_id integer not null references command(id),
     description text not null,
-    inputs jsonb not null
+    inputs jsonb not null,
+    resolution_key varchar(24),
+    recipe_type recipe_type not null default 'regular'
 );
 
 CREATE TABLE keyword_recipe (

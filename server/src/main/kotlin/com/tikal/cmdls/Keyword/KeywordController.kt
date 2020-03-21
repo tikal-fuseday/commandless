@@ -16,10 +16,11 @@ class KeywordController {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    fun keywordAutocompletion(@QueryParam("q") key: String): List<Keyword> =
-        keywordService.getByPartialKey(key)
+    fun keywordAutocompletion(@QueryParam("q") key: String): List<Keyword> {
+        return keywordService.getByPartialKey(key)
             .defaultIfEmpty(emptyList())
             .blockingFirst()
+    }
 
     @Operation
     @GET
